@@ -7,18 +7,24 @@ import java.io.InputStreamReader;
 
 public class RedesController {
 	
-	private String adaptIp = " ";
 	
 	public RedesController() {
 		super();
 	}
 	
+	public String os() {
+		String os = System.getProperty("os.name");
+		String arch = System.getProperty("os.arch");
+		String version = System.getProperty("os.version");
+		return os + " v. " + version + " arch. " +arch;
+	}
+	
 	public void ip(String ipconfig) {
 		
 		String sistemaOp = os();
-		String adap [] = new String [4];
-		int i = 0;
-		String ipv4 [] = new String [4];
+		
+		int contador = contagemAdap (ipconfig, sistemaOp);
+		String[][] AdapIp = new String [contador][contador];
 		
 		if(sistemaOp.contains("Windows")) {
 			//TODO
@@ -29,17 +35,8 @@ public class RedesController {
 				BufferedReader buffer = new BufferedReader(leitor);
 				String linha = buffer.readLine();
 				
-				while(linha !=null) {
-					//System.out.println(linha);
-					if (linha.contains("Adaptador")){
-						adap[i] = linha;
-						i++;
-					} else if(linha.contains("IPv4")){
-						ipv4[i-1] = linha;
-					}
-					linha = buffer.readLine();
-					
-				}
+				AdapIp = getAdapIpv4(buffer, linha);
+				
 				buffer.close();
 				leitor.close();
 				fluxo.close();
@@ -57,10 +54,8 @@ public class RedesController {
 			BufferedReader buffer = new BufferedReader(leitor);
 			String linha = buffer.readLine();
 			
-			while(linha !=null) {
-				System.out.println(linha);
-				linha = buffer.readLine();
-			}
+			AdapIp = getAdapIpv4(buffer, linha);
+			
 			buffer.close();
 			leitor.close();
 			fluxo.close();
@@ -69,55 +64,90 @@ public class RedesController {
 				e1.printStackTrace();
 			}
 		}
-		for (int j = 0; j<4; j++) {
-			System.out.println(adap[j] + " \n " + ipv4[j]);
+		for (int j = 0; j<contador; j++) {
+			if(AdapIp[1][j] != null) {
+				System.out.println(AdapIp[0][j] + " \n " + AdapIp[1][j]);
+			}
+			
 		}
 	}
-		
-
-	public String os() {
-		String os = System.getProperty("os.name");
-		String arch = System.getProperty("os.arch");
-		String version = System.getProperty("os.version");
-		return os + " v. " + version + " arch. " +arch;
-	}
 	
-	
-	public String getAdaptador(BufferedReader buffer, String linha) {
-		String adaptador = linha;
-		String ipv4 = null;
-		int aux = 0;
-		System.out.println(adaptador);
-		do {
+	public String [][] getAdapIpv4 (BufferedReader buffer, String linha) {
+		String [] [] AdapIpv4 = new String[5][5];
+		int i = 0;
+		while(linha !=null) {
+			//System.out.println(linha);
+			if (linha.contains("Adaptador")){
+				AdapIpv4[0][i] = linha;
+				i++;
+			} else if(linha.contains("IPv4")){
+				AdapIpv4[1][i-1] = linha;
+			}
 			try {
-				
-				if(linha.contains("IPv4")) {
-					ipv4 = getIPv4(linha);
-				}
 				linha = buffer.readLine();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println(linha);
-			if(linha == null) {
-				aux = 1;
-			}
-		} while(!linha.contains("Adaptador")  || aux != 1);
-		
-		adaptIp =  adaptIp + adaptador + " " + ipv4 + " / ";
-		System.out.println(adaptIp);
-		
-		if(linha != null) {
-			getAdaptador(buffer, linha);
 		}
-		return adaptIp;		
+		return AdapIpv4;
 	}
 	
-	public String getIPv4(String linha) {
-		String IPv4 = linha;
-		System.out.println(IPv4);
-		return IPv4;
+	//Método para pegar quantos adaptadores tem no sistema
+	public int contagemAdap (String ipconfig, String sistemaOp) {
+		
+		int contador = 0;
+		
+		if(sistemaOp.contains("Windows")) {
+			//TODO
+			try {
+				Process ipcfg = Runtime.getRuntime().exec(ipconfig);
+				InputStream fluxo = ipcfg.getInputStream(); //fluxo de dados
+				InputStreamReader leitor = new InputStreamReader(fluxo);
+				BufferedReader buffer = new BufferedReader(leitor);
+				String linha = buffer.readLine();
+				
+				while(linha!=null) {
+					if(linha.contains("Adaptador")) {
+						contador++;
+					}
+					linha = buffer.readLine();
+				}
+				
+				buffer.close();
+				leitor.close();
+				fluxo.close();
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+		}
+		else {
+			ipconfig = "ifconfig";
+			try {
+			Process ipcfg = Runtime.getRuntime().exec(ipconfig);
+			InputStream fluxo = ipcfg.getInputStream(); //fluxo de dados
+			InputStreamReader leitor = new InputStreamReader(fluxo);
+			BufferedReader buffer = new BufferedReader(leitor);
+			String linha = buffer.readLine();
+			
+			while(linha!=null) {
+				if(linha.contains("Adaptador")) {
+					contador++;
+				}
+				linha = buffer.readLine();
+			}
+			
+			buffer.close();
+			leitor.close();
+			fluxo.close();
+			} catch (IOException e1) {
+			
+				e1.printStackTrace();
+			}
+		}
+		System.out.println(contador);
+		return contador;
 	}
+	
 	
 }
