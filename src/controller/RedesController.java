@@ -68,7 +68,6 @@ public class RedesController {
 			if(AdapIp[1][j] != null) {
 				System.out.println(AdapIp[0][j] + " \n " + AdapIp[1][j]);
 			}
-			
 		}
 	}
 	
@@ -98,7 +97,6 @@ public class RedesController {
 		int contador = 0;
 		
 		if(sistemaOp.contains("Windows")) {
-			//TODO
 			try {
 				Process ipcfg = Runtime.getRuntime().exec(ipconfig);
 				InputStream fluxo = ipcfg.getInputStream(); //fluxo de dados
@@ -141,13 +139,64 @@ public class RedesController {
 			leitor.close();
 			fluxo.close();
 			} catch (IOException e1) {
-			
 				e1.printStackTrace();
 			}
 		}
-		System.out.println(contador);
+		//System.out.println(contador);
 		return contador;
 	}
 	
+	public void getPing(String ping) {
+		
+		String sistemaOp = os();
+		String getMedia = "";
+		
+		if(sistemaOp.contains("Windows")) {
+			getMedia = passagemPing(getMedia, ping);
+			}
+		else {
+			ping = "ping -4 -c 10 www.google.com.br";
+			getMedia = passagemPing(getMedia, ping);
+		}
+		
+		System.out.println(getMedia);
+		System.out.println(" // ");
+		
+		String [] media = getMedia.split(",");
+		
+		System.out.println(media[2]);
+		
+	}
+	
+	public String passagemPing(String getMedia, String ping) {
+		int i = 0;
+		try {
+			Process getping = Runtime.getRuntime().exec(ping);
+			InputStream fluxo = getping.getInputStream();
+			InputStreamReader leitor = new InputStreamReader(fluxo);
+			BufferedReader buffer = new BufferedReader(leitor);
+			String linha = buffer.readLine();
+			System.out.println("Aguarde um momento...");
+			
+			while(linha!=null) {
+				if(linha.contains("dia")) {
+					getMedia = linha;
+				} else if (linha.contains("Resposta") && linha !=null) {
+					System.out.println("Ping " + (i+1));
+					i++;
+				}
+				//System.out.println(linha);
+				linha = buffer.readLine();
+				
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return getMedia;
+	}
+
 	
 }
