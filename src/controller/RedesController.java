@@ -35,7 +35,7 @@ public class RedesController {
 				BufferedReader buffer = new BufferedReader(leitor);
 				String linha = buffer.readLine();
 				
-				AdapIp = getAdapIpv4(buffer, linha);
+				AdapIp = getAdapIpv4(buffer, linha, contador);
 				
 				buffer.close();
 				leitor.close();
@@ -54,7 +54,7 @@ public class RedesController {
 			BufferedReader buffer = new BufferedReader(leitor);
 			String linha = buffer.readLine();
 			
-			AdapIp = getAdapIpv4(buffer, linha);
+			AdapIp = getAdapIpv4(buffer, linha, contador);
 			
 			buffer.close();
 			leitor.close();
@@ -71,8 +71,8 @@ public class RedesController {
 		}
 	}
 	
-	public String [][] getAdapIpv4 (BufferedReader buffer, String linha) {
-		String [] [] AdapIpv4 = new String[5][5];
+	public String [][] getAdapIpv4 (BufferedReader buffer, String linha, int contador) {
+		String [] [] AdapIpv4 = new String[contador][contador];
 		int i = 0;
 		while(linha !=null) {
 			//System.out.println(linha);
